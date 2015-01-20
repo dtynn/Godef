@@ -60,7 +60,10 @@ class GodefCommand(sublime_plugin.WindowCommand):
     print("[Godef]INFO: spawning: " + " ".join(args))
 
     env = os.environ.copy()
-    env["GOPATH"] = gopath
+    # env["GOPATH"] = gopath
+    gosublime_settings = sublime.load_settings("GoSublime.sublime-settings")
+    workpath = gosublime_settings.get("env", {}).get("GOPATH", gopath)
+    env["GOPATH"] = workpath
     p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
     output, stderr = p.communicate()
     if stderr:
