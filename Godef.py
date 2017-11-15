@@ -22,9 +22,8 @@ class GodefCommand(sublime_plugin.WindowCommand):
 
         default_setting = sublime.load_settings("Preferences.sublime-settings")
         default_setting.set("default_line_ending", "unix")
-        settings = sublime.load_settings("Godef.sublime-settings")
-        gopath = settings.get("gopath", os.getenv('GOPATH'))
-        goroot = settings.get("goroot", os.getenv('GOROOT'))
+        gopath, goroot = self.get_settings()
+
 
         self.load(gopath, goroot, self.systype)
         self.gopath = gopath
@@ -33,6 +32,17 @@ class GodefCommand(sublime_plugin.WindowCommand):
             super(GodefCommand, self).__init__(window)
         else:
             super().__init__(window)
+
+    def get_settings(self):
+        gosublime_settings = sublime.load_settings("GoSublime.sublime-settings")
+        if gosublime_settings:
+            gopath = gosublime_settings.get("env", {}).get("GOPATH", os.getenv('GOPATH'))
+            goroot = gosublime_settings.get("env", {}).get("GOROOT", os.getenv('GOROOT'))
+            if gopath and goroot:
+                return gopath, goroot
+
+        settings = sublime.load_settings("Godef.sublime-settings")
+        return settings.get("gopath", os.getenv('GOPATH')), settings.get("goroot", os.getenv('GOROOT'))
 
     def load(self, gopath, goroot, systype):
         print("===============[Godef]Load Begin==============")
@@ -98,9 +108,8 @@ to install them.')
     def run(self):
         default_setting = sublime.load_settings("Preferences.sublime-settings")
         default_setting.set("default_line_ending", "unix")
-        settings = sublime.load_settings("Godef.sublime-settings")
-        gopath = settings.get("gopath", os.getenv('GOPATH'))
-        goroot = settings.get("goroot", os.getenv('GOROOT'))
+
+        gopath, goroot = self.get_settings()
 
         if self.gopath != gopath or self.goroot != goroot:
             print('[Godef]INFO: settings change, reload conf')
